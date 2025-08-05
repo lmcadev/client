@@ -18,8 +18,12 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build the app
+      - name: Dar permisos a mvnw
+        run: chmod +x ./mvnw
+
+      - name: Build con Maven
         run: ./mvnw clean package -DskipTests
+
 
       - name: Copy JAR to EC2
         uses: appleboy/scp-action@v0.1.4
