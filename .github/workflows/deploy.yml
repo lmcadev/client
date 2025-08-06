@@ -34,16 +34,11 @@ jobs:
           source: "target/*.jar"
           target: "~/app"
 
-      - name: Print part of SSH key (debug temporal)
-        run: echo "${{ secrets.EC2_SSH_KEY }}" | head -c 40
-
-
-      - name: Restart app
+      - name: Ejecutar restart-app.sh en EC2
         uses: appleboy/ssh-action@v0.1.4
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            pkill -f 'java -jar' || true
-            nohup java -jar ~/app/*.jar > ~/app/log.txt 2>&1 &
+          script: "~/restart-app.sh"
+
