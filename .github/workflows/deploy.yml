@@ -24,13 +24,6 @@ jobs:
       - name: Build con Maven
         run: ./mvnw clean package -DskipTests
 
-      - name: Validar si se conecta por SSH (debug temporal)
-        uses: appleboy/ssh-action@v0.1.4
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: "echo  Conexión exitosa"
 
       - name: Copiar JAR y restart-app.sh
         uses: appleboy/scp-action@v0.1.4
