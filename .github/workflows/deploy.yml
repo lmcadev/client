@@ -1,36 +1,29 @@
-name: Deploy to EC2
+name: Deploy Docker App to EC2
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout código
         uses: actions/checkout@v3
 
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '21'
+      - name: Copiar archivos al servidor EC2
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          scp -o StrictHostKeyChecking=no -r . ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/app
 
-      - name: Dar permisos a mvnw
-        run: chmod +x ./mvnw
-
-      - name: Build con Maven
-        run: ./mvnw clean package -DskipTests
-
-
-      - name: Copy JAR to EC2
-        uses: appleboy/scp-action@v0.1.4
-        with:
-            host: ${{ secrets.EC2_HOST }}
-            username: ${{ secrets.EC2_USER }}
-            key: ${{ secrets.EC2_SSH }}
-            source: "target/*.jar"
-            target: "~/app"
-
+      - name: Ejecutar contenedor en EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+            cd /home/ec2-user/app
+            docker-compose down || true
+            docker-compose up -d --build
+          EOF
