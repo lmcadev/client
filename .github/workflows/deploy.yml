@@ -2,7 +2,7 @@ name: Deploy to EC2
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   deploy:
@@ -24,19 +24,13 @@ jobs:
       - name: Build con Maven
         run: ./mvnw clean package -DskipTests
 
-      - name: Conectando con usuario
-        run: echo "${{ secrets.EC2_USER }}" | head -c 40
 
-
-      - name: Copiar JAR y restart-app.sh
+      - name: Copy JAR to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH }}
-          source: |
-            target/*.jar
-            deploy-and-restart.sh
-          target: "~/app"
-
+            host: ${{ secrets.EC2_HOST }}
+            username: ${{ secrets.EC2_USER }}
+            key: ${{ secrets.EC2_SSH_KEY }}
+            source: "target/*.jar"
+            target: "~/app"
 
