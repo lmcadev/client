@@ -24,21 +24,29 @@ jobs:
       - name: Build con Maven
         run: ./mvnw clean package -DskipTests
 
-
-      - name: Copy JAR to EC2
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "target/*.jar"
-          target: "~/app"
-
-      - name: Ejecutar restart-app.sh en EC2
+      - name: Validar si se conecta por SSH (debug temporal)
         uses: appleboy/ssh-action@v0.1.4
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          script: "~/restart-app.sh"
+          script: "echo  Conexión exitosa"
 
+      - name: Copiar JAR y restart-app.sh
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: |
+            target/*.jar
+            deploy-and-restart.sh
+          target: "~/app"
+
+      - name: Ejecutar script de reinicio desde el propio servidor (borrar si no funciona ssh)
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: "cd ~/app && chmod +x deploy-and-restart.sh && ./deploy-and-restart.sh"
