@@ -34,6 +34,10 @@ jobs:
           source: "target/*.jar"
           target: "~/app"
 
+      - name: Print part of SSH key (debug temporal)
+        run: echo "${{ secrets.EC2_SSH_KEY }}" | head -c 40
+
+
       - name: Restart app
         uses: appleboy/ssh-action@v0.1.4
         with:
